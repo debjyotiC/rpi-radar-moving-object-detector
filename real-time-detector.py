@@ -4,13 +4,28 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 import os
 from datetime import datetime
+from dependencies.database_class import DatabaseConnector
+from dependencies.central_database_update import write_bunker_status
 
-# TO DO: Add your own config file and model path
+radar_type = 1642
+
+CLIport = {}
+Dataport = {}
+byteBuffer = np.zeros(2 ** 15, dtype='uint8')
+byteBufferLength = 0
+
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# TO DO: Add your own config file and model path
-configFileName = "config_files/AWR1642.cfg"
-model_path = "model/range-doppler-default.tflite"
+if radar_type == 1642:
+    configFileName = f"{script_dir}/config_files/AWR1642.cfg"
+elif radar_type == 2944:
+    configFileName = f"{script_dir}/config_files/AWR2944.cfg"
+
+db_connector = DatabaseConnector(f"{script_dir}/database/radar_database.db")
+db_connector.connect()
+db_connector.create_schema()
+
+
 
 debug = False  # prints Range-Doppler data when enabled
 
@@ -56,9 +71,9 @@ def print_generator(range_arr, doppler_array, range_doppler, tflite_model):
     classes = interpreter.get_tensor(output_details['index'])[0]
     pred = np.argmax(classes)
 
-    db = {'Prediction': classes_values[pred], 'Time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    obj_dict = {'Prediction': classes_values[pred]}
 
-    print(db)
+    print(obj_dict)
 
 
 # Function to configure the serial ports and send the data from
@@ -66,15 +81,33 @@ def print_generator(range_arr, doppler_array, range_doppler, tflite_model):
 def serialConfig(configFileName):
     global CLIport
     global Dataport
-    # Open the serial ports for the configuration and the data ports
 
-    # Raspberry pi / Ubuntu add ports to dial out user group sudo usermod -a -G dialout $USER
-    CLIport = serial.Serial('/dev/ttyACM0', 115200)
-    Dataport = serial.Serial('/dev/ttyACM1', 852272)
+    port_found = False
 
-    # Windows
-    # CLIport = serial.Serial('COM6', 115200)
-    # Dataport = serial.Serial('COM7', 852272)
+    while not port_found:
+        try:
+            # Open the serial ports for the configuration and the data ports
+
+            # Raspberry Pi / Ubuntu
+            # CLIport = serial.Serial('/dev/ttyACM0', 115200)
+            # Dataport = serial.Serial('/dev/ttyACM1', 921600)
+
+            # Windows
+            # CLIport = serial.Serial('COM4', 115200)
+            # Dataport = serial.Serial('COM5', 852272)
+
+            if radar_type == 1642:
+                CLIport = serial.Serial('/dev/ttyACM0', 115200)
+                Dataport = serial.Serial('/dev/ttyACM1', 921600)
+            elif radar_type == 2944:
+                CLIport = serial.Serial('COM4', 115200)
+                Dataport = serial.Serial('COM5', 852272)
+
+            port_found = True
+
+        except serial.SerialException:
+            print("Serial port not found. Retrying in 1 second...")
+            time.sleep(1)
 
     # Read the configuration file and send it to the board
     config = [line.rstrip('\r\n') for line in open(configFileName)]
