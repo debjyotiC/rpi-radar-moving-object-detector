@@ -1,0 +1,5 @@
+numpy
+tflite-runtime
+serial
+sqlite3
+pymongo
