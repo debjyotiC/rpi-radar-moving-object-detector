@@ -17,7 +17,7 @@ byteBufferLength = 0
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 if radar_type == 1642:
-    configFileName = f"{script_dir}/config_files/AWR1642.cfg"
+    configFileName = f"{script_dir}/config_files/AWR1642_range_doppler.cfg"
 elif radar_type == 2944:
     configFileName = f"{script_dir}/config_files/AWR2944.cfg"
 
