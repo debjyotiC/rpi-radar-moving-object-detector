@@ -3,9 +3,10 @@ import time
 import numpy as np
 import tflite_runtime.interpreter as tflite
 import os
-from datetime import datetime
-from dependencies.database_class import DatabaseConnector
-from dependencies.central_database_update import write_bunker_status
+
+# from datetime import datetime
+# from dependencies.database_class import DatabaseConnector
+# from dependencies.central_database_update import write_bunker_status
 
 radar_type = 1642
 
@@ -21,13 +22,11 @@ if radar_type == 1642:
 elif radar_type == 2944:
     configFileName = f"{script_dir}/config_files/AWR2944.cfg"
 
-db_connector = DatabaseConnector(f"{script_dir}/database/radar_database.db")
-db_connector.connect()
-db_connector.create_schema()
+# db_connector = DatabaseConnector(f"{script_dir}/database/radar_database.db")
+# db_connector.connect()
+# db_connector.create_schema()
 
-
-
-debug = False  # prints Range-Doppler data when enabled
+model_path = f"{script_dir}/model/range-doppler-default.tflite"
 
 CLIport = {}
 Dataport = {}
@@ -53,7 +52,7 @@ def apply_2d_cfar(signal, guard_band_width, kernel_size, threshold_factor):
     return thresholded_signal
 
 
-def print_generator(range_arr, doppler_array, range_doppler, tflite_model):
+def print_generator(range_doppler, tflite_model):
     range_doppler_cfar = apply_2d_cfar(range_doppler, guard_band_width=3, kernel_size=5, threshold_factor=1)
 
     interpreter = tflite.Interpreter(model_path=tflite_model)
@@ -86,16 +85,6 @@ def serialConfig(configFileName):
 
     while not port_found:
         try:
-            # Open the serial ports for the configuration and the data ports
-
-            # Raspberry Pi / Ubuntu
-            # CLIport = serial.Serial('/dev/ttyACM0', 115200)
-            # Dataport = serial.Serial('/dev/ttyACM1', 921600)
-
-            # Windows
-            # CLIport = serial.Serial('COM4', 115200)
-            # Dataport = serial.Serial('COM5', 852272)
-
             if radar_type == 1642:
                 CLIport = serial.Serial('/dev/ttyACM0', 115200)
                 Dataport = serial.Serial('/dev/ttyACM1', 921600)
@@ -365,7 +354,7 @@ def readAndParseData16xx(Dataport, configParameters):
                     np.arange(-configParameters["numDopplerBins"] / 2, configParameters["numDopplerBins"] / 2),
                     configParameters["dopplerResolutionMps"])
 
-                print_generator(rangeArray, dopplerArray, rangeDoppler, model_path)
+                print_generator(rangeDoppler, model_path)
 
         # Remove already processed data
         if 0 < idX < byteBufferLength:

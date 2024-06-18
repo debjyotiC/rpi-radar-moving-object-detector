@@ -1,5 +1,4 @@
 numpy
 tflite-runtime
-serial
-sqlite3
+pyserial
 pymongo
