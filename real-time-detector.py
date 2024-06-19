@@ -5,7 +5,7 @@ import tflite_runtime.interpreter as tflite
 import os
 
 
-radar_type = 2944
+radar_type = 1642
 
 CLIport = {}
 Dataport = {}
