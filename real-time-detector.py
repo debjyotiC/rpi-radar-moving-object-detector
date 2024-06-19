@@ -4,11 +4,8 @@ import numpy as np
 import tflite_runtime.interpreter as tflite
 import os
 
-# from datetime import datetime
-# from dependencies.database_class import DatabaseConnector
-# from dependencies.central_database_update import write_bunker_status
 
-radar_type = 1642
+radar_type = 2944
 
 CLIport = {}
 Dataport = {}
@@ -18,13 +15,10 @@ byteBufferLength = 0
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 if radar_type == 1642:
-    configFileName = f"{script_dir}/config_files/AWR1642_range_doppler.cfg"
+    configFileName = f"{script_dir}/config_files/AWR1642_Range_Doppler.cfg"
 elif radar_type == 2944:
-    configFileName = f"{script_dir}/config_files/AWR2944.cfg"
+    configFileName = f"{script_dir}/config_files/AWR2944_Range_Doppler.cfg"
 
-# db_connector = DatabaseConnector(f"{script_dir}/database/radar_database.db")
-# db_connector.connect()
-# db_connector.create_schema()
 
 model_path = f"{script_dir}/model/range-doppler-default.tflite"
 
@@ -54,7 +48,7 @@ def apply_2d_cfar(signal, guard_band_width, kernel_size, threshold_factor):
 
 def print_generator(range_doppler, tflite_model):
     range_doppler_cfar = apply_2d_cfar(range_doppler, guard_band_width=3, kernel_size=5, threshold_factor=1)
-
+    print(range_doppler_cfar.shape)
     interpreter = tflite.Interpreter(model_path=tflite_model)
     interpreter.allocate_tensors()
 
