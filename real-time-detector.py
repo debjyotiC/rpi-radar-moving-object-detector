@@ -20,7 +20,7 @@ elif radar_type == 2944:
     configFileName = f"{script_dir}/config_files/AWR2944_Range_Doppler.cfg"
 
 
-model_path = f"{script_dir}/model/range-doppler-default.tflite"
+model_path = f"{script_dir}/model/range-doppler-tent-default.tflite"
 
 CLIport = {}
 Dataport = {}
