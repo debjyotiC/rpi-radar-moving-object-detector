@@ -15,12 +15,12 @@ byteBufferLength = 0
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 if radar_type == 1642:
-    configFileName = f"{script_dir}/config_files/config_files/empty3-old.cfg"
+    configFileName = f"{script_dir}/config_files/5m.cfg"
 elif radar_type == 2944:
     configFileName = f"{script_dir}/config_files/AWR2944_Range_Doppler.cfg"
 
 
-model_path = f"{script_dir}/model/range-doppler-tent-2-default.tflite"
+model_path = f"{script_dir}/model/range-doppler-tent-3-default.tflite"
 
 CLIport = {}
 Dataport = {}
