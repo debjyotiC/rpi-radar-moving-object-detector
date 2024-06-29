@@ -2,3 +2,4 @@ numpy
 tflite-runtime
 pyserial
 pymongo
+flask

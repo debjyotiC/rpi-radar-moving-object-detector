@@ -3,7 +3,8 @@ import time
 import numpy as np
 import tflite_runtime.interpreter as tflite
 import os
-
+from dependencies.database_class import DatabaseConnector
+from dependencies.central_database_update import write_bunker_status
 
 radar_type = 1642
 
@@ -19,13 +20,16 @@ if radar_type == 1642:
 elif radar_type == 2944:
     configFileName = f"{script_dir}/config_files/AWR2944_Range_Doppler.cfg"
 
-
 model_path = f"{script_dir}/model/range-doppler-tent-3-default.tflite"
 
 CLIport = {}
 Dataport = {}
 byteBuffer = np.zeros(2 ** 15, dtype='uint8')
 byteBufferLength = 0
+
+db_connector = DatabaseConnector(f"{script_dir}/database/radar_database.db")
+db_connector.connect()
+db_connector.create_schema()
 
 
 # ------------------------------------------------------------------
@@ -65,6 +69,23 @@ def print_generator(range_doppler, tflite_model):
     pred = np.argmax(classes)
 
     obj_dict = {'Prediction': classes_values[pred]}
+
+    if obj_dict['Prediction'] == 'not_clear':
+        path_clearance = "path not clear"
+        detected = "y"
+    else:
+        path_clearance = "path clear"
+        detected = "n"
+
+    obj_dict = {"Obj_Detected": path_clearance,
+                "Obj_detection_flag": detected,
+                "Threshold": 0.0,
+                "Sum": 0.0,
+                "Scene_Image": range_doppler.tolist()
+                }
+
+    db_connector.insert_data(obj_dict)
+    write_bunker_status(detected)
 
     print(obj_dict)
 
