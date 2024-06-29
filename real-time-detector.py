@@ -18,7 +18,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 if radar_type == 1642:
     configFileName = f"{script_dir}/config_files/5m.cfg"
 elif radar_type == 2944:
-    configFileName = f"{script_dir}/config_files/AWR2944_Range_Doppler.cfg"
+    configFileName = f"{script_dir}/config_files/AWR2944_Home.cfg"
 
 model_path = f"{script_dir}/model/range-doppler-tent-3-default.tflite"
 
@@ -52,7 +52,7 @@ def apply_2d_cfar(signal, guard_band_width, kernel_size, threshold_factor):
 
 def print_generator(range_doppler, tflite_model):
     range_doppler_cfar = apply_2d_cfar(range_doppler, guard_band_width=3, kernel_size=5, threshold_factor=1)
-    print(range_doppler_cfar.shape)
+
     interpreter = tflite.Interpreter(model_path=tflite_model)
     interpreter.allocate_tensors()
 
@@ -85,7 +85,9 @@ def print_generator(range_doppler, tflite_model):
                 }
 
     db_connector.insert_data(obj_dict)
-    write_bunker_status(detected)
+
+    if radar_type == 1642:
+        write_bunker_status(detected)
 
     print(obj_dict)
 
