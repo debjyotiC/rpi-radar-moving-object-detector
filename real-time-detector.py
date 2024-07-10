@@ -77,14 +77,14 @@ def print_generator(range_doppler, tflite_model):
         path_clearance = "path clear"
         detected = "n"
 
-    obj_dict = {"Obj_Detected": path_clearance,
-                "Obj_detection_flag": detected,
-                "Threshold": 0.0,
-                "Sum": 0.0,
-                "Scene_Image": range_doppler.tolist()
-                }
+    detection_dict = {"Obj_Detected": path_clearance,
+                      "Obj_detection_flag": detected,
+                      "Threshold": 0.0,
+                      "Sum": 0.0,
+                      "Scene_Image": range_doppler.tolist()
+                      }
 
-    db_connector.insert_data(obj_dict)
+    db_connector.insert_data(detection_dict)
 
     if radar_type == 1642:
         write_bunker_status(detected)
